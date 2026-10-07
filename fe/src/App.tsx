@@ -48,15 +48,33 @@ function App() {
 
         <div className="board-columns">
           <section aria-labelledby="todo-heading">
-            <h3>To Do</h3>
+            <h3 id="todo-heading" className="column-heading">
+              <span
+                className="status-dot status-dot--todo"
+                aria-hidden="true"
+              />
+              To Do
+            </h3>
             <ul className="task-list"></ul>
           </section>
           <section aria-labelledby="in-progress-heading">
-            <h3>In Progress</h3>
+            <h3 id="progress-heading" className="column-heading">
+              <span
+                className="status-dot status-dot--progress"
+                aria-hidden="true"
+              />
+              In Progress
+            </h3>
             <ul className="task-list"></ul>
           </section>
           <section aria-labelledby="done-heading">
-            <h3>Done</h3>
+            <h3 id="done-heading" className="column-heading">
+              <span
+                className="status-dot status-dot--done"
+                aria-hidden="true"
+              />
+              Done
+            </h3>
             <ul className="task-list"></ul>
           </section>
         </div>

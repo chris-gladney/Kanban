@@ -1,0 +1,69 @@
+:root {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color: #475569;
+  background-color: #f5f7fb;
+
+  --surface: #ffffff;
+  --column-bg: #eef2f7;
+  --heading: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+}
+
+body {
+  margin: 0;
+}
+
+h1 {
+  color: var(--heading);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.title-block p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+button,
+input {
+  font: inherit;
+  font-size: 14px;
+}
+
+button {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.new-task-button {
+  color: #ffffff;
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.new-task-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.filter-button {
+  color: #334155;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.filter-button:hover {
+  background-color: #f1f5f9;
+}

@@ -1,11 +1,18 @@
 import { useState } from "react";
-// import heroImg from './assets/hero.png'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from './assets/vite.svg'
 import "./App.css";
+import initialTasks from "./assets/fakeDB/tasks.ts";
+import type { Task } from "./types/Task.ts";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [tasksList, setTasksList] = useState<Task[]>(initialTasks);
+
+  const todoTasks = tasksList.filter((task) => task.status === "todo");
+  const inProgressTasks = tasksList.filter(
+    (task) => task.status === "in-progress",
+  );
+  const doneTasks = tasksList.filter((task) => task.status === "done");
+
+  console.log(tasksList);
 
   return (
     <main>
@@ -55,7 +62,11 @@ function App() {
               />
               To Do
             </h3>
-            <ul className="task-list"></ul>
+            <ul className="task-list">
+              {todoTasks.map((task) => {
+                return <li key={task.id}>{task.title}</li>;
+              })}
+            </ul>
           </section>
           <section aria-labelledby="in-progress-heading">
             <h3 id="progress-heading" className="column-heading">
@@ -65,7 +76,11 @@ function App() {
               />
               In Progress
             </h3>
-            <ul className="task-list"></ul>
+            <ul className="task-list">
+              {inProgressTasks.map((task) => {
+                return <li key={task.id}>{task.title}</li>;
+              })}
+            </ul>
           </section>
           <section aria-labelledby="done-heading">
             <h3 id="done-heading" className="column-heading">
@@ -75,7 +90,11 @@ function App() {
               />
               Done
             </h3>
-            <ul className="task-list"></ul>
+            <ul className="task-list">
+              {doneTasks.map((task) => {
+                return <li key={task.id}>{task.title}</li>;
+              })}
+            </ul>
           </section>
         </div>
       </section>

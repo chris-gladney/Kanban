@@ -1,20 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { Task } from "../types/Task";
 
-type TaskDetailsChanges = Partial<
-  Pick<Task, "status" | "priority" | "dueDate">
->;
 interface TaskDetailsProps {
   task: Task;
   onClose: () => void;
   onSave: (updatedTask: Task) => Promise<void>;
 }
-
-const statusLabels = {
-  todo: "To Do",
-  "in-progress": "In Progress",
-  done: "Done",
-};
 
 function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
   const [draftTask, setDraftTask] = useState<Task>(task);
@@ -40,14 +31,6 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
   const completedCount = draftTask.checklist.filter(
     (item) => item.completed,
   ).length;
-
-  const formattedDueDate = draftTask.dueDate
-    ? new Intl.DateTimeFormat("en-GB", {
-        day: "numeric",
-        month: "short",
-        timeZone: "UTC",
-      }).format(new Date(draftTask.dueDate))
-    : "No due date";
 
   function updateDraft(
     changes: Partial<Pick<Task, "status" | "priority" | "dueDate">>,
@@ -117,6 +100,7 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
         className="task-details-close"
         aria-label="Close task details"
         onClick={onClose}
+        disabled={isSaving}
         autoFocus
       >
         x
@@ -133,7 +117,7 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
               <select
                 id="task-status"
                 className="details-control"
-                value={task.status}
+                value={draftTask.status}
                 onChange={(event) =>
                   updateDraft({ status: event.target.value as Task["status"] })
                 }
@@ -153,16 +137,16 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
               <select
                 id="task-priority"
                 className="details-control"
-                value={task.priority}
+                value={draftTask.priority}
                 onChange={(event) =>
                   updateDraft({
                     priority: event.target.value as Task["priority"],
                   })
                 }
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
               </select>
             </dd>
           </div>
@@ -176,7 +160,7 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
                 id="task-due-date"
                 className="details-control"
                 type="date"
-                value={task.dueDate ?? ""}
+                value={draftTask.dueDate ?? ""}
                 onChange={(event) =>
                   updateDraft({ dueDate: event.target.value || null })
                 }

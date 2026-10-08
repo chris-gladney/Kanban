@@ -1,15 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
-import initialTasks from "./assets/fakeDB/tasks.ts";
+
 import type { Task } from "./types/Task.ts";
 import TaskCard from "./Components/TaskCard.tsx";
 import TaskDetails from "./Components/TaskDetails.tsx";
 import AddTask, { type NewTaskData } from "./Components/AddTask.tsx";
 
+const TASKS_API = "http://localhost:3001/api/tasks";
+
 function App() {
-  const [tasksList, setTasksList] = useState<Task[]>(initialTasks);
+  const [tasksList, setTasksList] = useState<Task[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isAddingTask, setIsAddingTask] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [createError, setCreateError] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadTasks() {
+      try {
+        const response = await fetch(TASKS_API, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load tasks");
+        }
+
+        const tasks: Task[] = await response.json();
+        setTasksList(tasks);
+      } catch {
+        if (!controller.signal.aborted) {
+          setLoadError(
+            "Could not load tasks. Check that the server is running.",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadTasks();
+
+    return () => controller.abort();
+  }, []);
 
   const selectedTask = tasksList.find((task) => task.id === selectedTaskId);
 
@@ -20,24 +59,58 @@ function App() {
   const doneTasks = tasksList.filter((task) => task.status === "done");
 
   async function saveTask(updatedTask: Task): Promise<void> {
+    const response = await fetch(`${TASKS_API}/${updatedTask.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedTask),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save task");
+    }
+
+    const savedTask: Task = await response.json();
+
     setTasksList((previousTasks) =>
       previousTasks.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task,
+        task.id === savedTask.id ? savedTask : task,
       ),
     );
   }
 
-  function createTask(taskData: NewTaskData) {
-    const newTask = {
+  async function createTask(taskData: NewTaskData): Promise<void> {
+    setCreateError("");
+
+    const newTask: Omit<Task, "id"> = {
       ...taskData,
-      id: crypto.randomUUID(),
       comments: [],
       category: "Design",
-      position: 1
+      position: 1,
     };
 
-    setTasksList((previousTasks) => [...previousTasks, newTask]);
-    setIsAddingTask(false);
+    try {
+      const response = await fetch(TASKS_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newTask),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create task");
+      }
+
+      const createdTask: Task = await response.json();
+
+      setTasksList((previousTasks) => [...previousTasks, createdTask]);
+
+      setIsAddingTask(false);
+    } catch {
+      setCreateError("Could not create the task. Please try again.");
+    }
   }
 
   return (
@@ -61,6 +134,7 @@ function App() {
               <circle cx="10.5" cy="10.5" r="6.5" />
               <path d="m16 16 4.5 4.5" />
             </svg>
+
             <input
               type="search"
               aria-label="Search tasks"
@@ -71,17 +145,27 @@ function App() {
           <button type="button" className="filter-button">
             Filter
           </button>
+
           <button
             type="button"
             className="new-task-button"
-            onClick={() => setIsAddingTask(true)}
+            disabled={isLoading || Boolean(loadError)}
+            onClick={() => {
+              setCreateError("");
+              setIsAddingTask(true);
+            }}
           >
             + New Task
           </button>
         </div>
       </header>
+
+      {isLoading && <p role="status">Loading tasks…</p>}
+      {loadError && <p role="alert">{loadError}</p>}
+      {createError && <p role="alert">{createError}</p>}
+
       <section className="tasks" aria-labelledby="tasks-heading">
-        <h2>Tasks</h2>
+        <h2 id="tasks-heading">Tasks</h2>
 
         <div className="board-columns">
           <section aria-labelledby="todo-heading">
@@ -92,38 +176,38 @@ function App() {
               />
               To Do
             </h3>
+
             <ul className="task-list">
-              {todoTasks.map((task) => {
-                return (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onSelect={setSelectedTaskId}
-                  />
-                );
-              })}
+              {todoTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onSelect={setSelectedTaskId}
+                />
+              ))}
             </ul>
           </section>
+
           <section aria-labelledby="in-progress-heading">
-            <h3 id="progress-heading" className="column-heading">
+            <h3 id="in-progress-heading" className="column-heading">
               <span
                 className="status-dot status-dot--progress"
                 aria-hidden="true"
               />
               In Progress
             </h3>
+
             <ul className="task-list">
-              {inProgressTasks.map((task) => {
-                return (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onSelect={setSelectedTaskId}
-                  />
-                );
-              })}
+              {inProgressTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onSelect={setSelectedTaskId}
+                />
+              ))}
             </ul>
           </section>
+
           <section aria-labelledby="done-heading">
             <h3 id="done-heading" className="column-heading">
               <span
@@ -132,20 +216,20 @@ function App() {
               />
               Done
             </h3>
+
             <ul className="task-list">
-              {doneTasks.map((task) => {
-                return (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onSelect={setSelectedTaskId}
-                  />
-                );
-              })}
+              {doneTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onSelect={setSelectedTaskId}
+                />
+              ))}
             </ul>
           </section>
         </div>
       </section>
+
       {selectedTask && (
         <TaskDetails
           key={selectedTask.id}
@@ -154,8 +238,15 @@ function App() {
           onSave={saveTask}
         />
       )}
+
       {isAddingTask && (
-        <AddTask onClose={() => setIsAddingTask(false)} onCreate={createTask} />
+        <AddTask
+          onClose={() => {
+            setIsAddingTask(false);
+            setCreateError("");
+          }}
+          onCreate={createTask}
+        />
       )}
     </main>
   );

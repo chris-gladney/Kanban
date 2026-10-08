@@ -43,10 +43,6 @@ function TaskCard({
       </h4>
 
       <div className="task-tags">
-        <span className={`task-badge category--${categoryClass}`}>
-          {task.category}
-        </span>
-
         <span className={`task-badge priority--${task.priority}`}>
           {task.priority}
         </span>

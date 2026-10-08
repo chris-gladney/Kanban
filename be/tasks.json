@@ -1,1 +1,94 @@
-[]
+[
+  {
+    "description": "Design a landing page",
+    "status": "todo",
+    "priority": "High",
+    "category": "Design",
+    "dueDate": "2026-10-09",
+    "position": 1,
+    "checklist": [
+      {
+        "id": "d4aaa033-6fbd-431a-919e-7cd976d22ba0",
+        "text": "Headers",
+        "completed": false
+      },
+      {
+        "id": "f7d6dc62-baef-4706-980a-bd4d22e23c2e",
+        "text": "Tasks board",
+        "completed": false
+      }
+    ],
+    "comments": [],
+    "title": "Design landing page",
+    "id": "c7fcacef-309e-4175-9c97-9364e647367a"
+  },
+  {
+    "description": "Create backend to connect page to",
+    "status": "todo",
+    "priority": "Low",
+    "category": "Design",
+    "dueDate": "2026-10-09",
+    "position": 1,
+    "checklist": [
+      {
+        "id": "fa06e8d6-5817-40bd-9cb9-b816aebfb30f",
+        "text": "Tasks routes",
+        "completed": false
+      },
+      {
+        "id": "8e1149f8-ea64-461e-a0a2-52c0314e0c63",
+        "text": "Authentication",
+        "completed": false
+      },
+      {
+        "id": "2e7a8cc4-9b9d-4432-85ce-f48044a966da",
+        "text": "Comments",
+        "completed": false
+      }
+    ],
+    "comments": [],
+    "title": "Design backend framework",
+    "id": "3c39a62d-ef73-4cea-bd72-3e41eca2df72"
+  },
+  {
+    "description": "Write a read me file",
+    "status": "todo",
+    "priority": "Low",
+    "category": "Design",
+    "dueDate": "2026-10-10",
+    "position": 1,
+    "checklist": [
+      {
+        "id": "f84ddb9d-00b1-4e34-8695-c3a5033cb7b7",
+        "text": "Add technology stack",
+        "completed": false
+      },
+      {
+        "id": "b4ae8274-a3c2-498e-820a-38f1470032fe",
+        "text": "Add running instructions",
+        "completed": false
+      }
+    ],
+    "comments": [],
+    "title": "Generate README.md",
+    "id": "7fd9ba09-575a-47c7-a256-d2447ad7c34f"
+  },
+  {
+    "description": "Launch app with demo",
+    "status": "todo",
+    "priority": "Medium",
+    "category": "Design",
+    "dueDate": "2026-10-16",
+    "position": 1,
+    "checklist": [
+      {
+        "id": "21904614-cd4e-478d-99bd-cf329087cff2",
+        "text": "Show CEO page created",
+        "completed": false
+      }
+    ],
+    "comments": [],
+    "title": "Launch application",
+    "id": "0541cd2a-93bf-4479-a8e4-5342b34e2abf"
+  }
+]

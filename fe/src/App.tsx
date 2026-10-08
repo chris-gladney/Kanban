@@ -1,12 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { DragEvent } from "react";
+import type { Task, TaskStatus } from "./types/Task.ts";
 import "./App.css";
 
-import type { Task } from "./types/Task.ts";
 import TaskCard from "./Components/TaskCard.tsx";
 import TaskDetails from "./Components/TaskDetails.tsx";
 import AddTask, { type NewTaskData } from "./Components/AddTask.tsx";
 
 const TASKS_API = "http://localhost:3001/api/tasks";
+
+const columns: {
+  status: TaskStatus;
+  label: string;
+  dotClass: string;
+}[] = [
+  { status: "todo", label: "To Do", dotClass: "status-dot--todo" },
+  {
+    status: "in-progress",
+    label: "In Progress",
+    dotClass: "status-dot--progress",
+  },
+  { status: "done", label: "Done", dotClass: "status-dot--done" },
+];
 
 function App() {
   const [tasksList, setTasksList] = useState<Task[]>([]);
@@ -19,6 +34,13 @@ function App() {
 
   const [searchInput, setSearchInput] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [overColumn, setOverColumn] = useState<TaskStatus | null>(null);
+  const [isMovingTask, setIsMovingTask] = useState(false);
+  const [moveError, setMoveError] = useState("");
+
+  const moveInFlight = useRef(false);
 
   const filteredTasks = tasksList.filter((task) =>
     task.title.toLowerCase().includes(appliedSearch.trim().toLowerCase()),
@@ -58,12 +80,6 @@ function App() {
   }, []);
 
   const selectedTask = tasksList.find((task) => task.id === selectedTaskId);
-
-  const todoTasks = tasksList.filter((task) => task.status === "todo");
-  const inProgressTasks = tasksList.filter(
-    (task) => task.status === "in-progress",
-  );
-  const doneTasks = tasksList.filter((task) => task.status === "done");
 
   async function saveTask(updatedTask: Task): Promise<void> {
     const response = await fetch(`${TASKS_API}/${updatedTask.id}`, {
@@ -128,6 +144,99 @@ function App() {
     }
   }
 
+  function startTaskDrag(event: DragEvent<HTMLLIElement>, taskId: string) {
+    if (moveInFlight.current) {
+      event.preventDefault();
+      return;
+    }
+
+    event.dataTransfer.setData("text/plain", taskId);
+    event.dataTransfer.effectAllowed = "move";
+
+    setDraggedTaskId(taskId);
+    setMoveError("");
+  }
+
+  function endTaskDrag() {
+    setDraggedTaskId(null);
+    setOverColumn(null);
+  }
+
+  function dragOverColumn(event: DragEvent<HTMLElement>, status: TaskStatus) {
+    // Ignore files or content dragged in from outside the board.
+    if (!draggedTaskId || moveInFlight.current) return;
+
+    // Required: without this, the browser won't allow a drop.
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+
+    setOverColumn(status);
+  }
+
+  async function dropTask(
+    event: DragEvent<HTMLElement>,
+    newStatus: TaskStatus,
+  ): Promise<void> {
+    event.preventDefault();
+
+    const taskId = event.dataTransfer.getData("text/plain");
+
+    if (!draggedTaskId || taskId !== draggedTaskId) return;
+
+    endTaskDrag();
+
+    if (moveInFlight.current) return;
+
+    const originalTask = tasksList.find((task) => task.id === taskId);
+
+    if (!originalTask || originalTask.status === newStatus) return;
+
+    const previousStatus = originalTask.status;
+
+    moveInFlight.current = true;
+    setIsMovingTask(true);
+    setMoveError("");
+
+    setTasksList((previousTasks) =>
+      previousTasks.map((task) =>
+        task.id === taskId ? { ...task, status: newStatus } : task,
+      ),
+    );
+
+    try {
+      const response = await fetch(`${TASKS_API}/${taskId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to move task");
+      }
+
+      const savedTask: Task = await response.json();
+
+      setTasksList((previousTasks) =>
+        previousTasks.map((task) =>
+          task.id === savedTask.id ? savedTask : task,
+        ),
+      );
+    } catch {
+      setTasksList((previousTasks) =>
+        previousTasks.map((task) =>
+          task.id === taskId ? { ...task, status: previousStatus } : task,
+        ),
+      );
+
+      setMoveError("Could not save the move. Please try again.");
+    } finally {
+      moveInFlight.current = false;
+      setIsMovingTask(false);
+    }
+  }
+
   return (
     <main>
       <header>
@@ -188,74 +297,61 @@ function App() {
       <section className="tasks" aria-labelledby="tasks-heading">
         <h2 id="tasks-heading">Tasks</h2>
 
-        <div className="board-columns">
-          <section aria-labelledby="todo-heading">
-            <h3 id="todo-heading" className="column-heading">
-              <span
-                className="status-dot status-dot--todo"
-                aria-hidden="true"
-              />
-              To Do
-            </h3>
+        <div className="board-columns" aria-busy={isMovingTask}>
+          {columns.map((column) => (
+            <section
+              key={column.status}
+              aria-labelledby={`${column.status}-heading`}
+              className={
+                overColumn === column.status ? "board-column--over" : undefined
+              }
+              onDragOver={(event) => dragOverColumn(event, column.status)}
+              onDragLeave={(event) => {
+                const nextTarget = event.relatedTarget;
 
-            <ul className="task-list">
-              {filteredTasks
-                .filter((task) => task.status === "todo")
-                .map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onSelect={setSelectedTaskId}
-                  />
-                ))}
-            </ul>
-          </section>
+                if (
+                  !(nextTarget instanceof Node) ||
+                  !event.currentTarget.contains(nextTarget)
+                ) {
+                  setOverColumn((current) =>
+                    current === column.status ? null : current,
+                  );
+                }
+              }}
+              onDrop={(event) => {
+                void dropTask(event, column.status);
+              }}
+            >
+              <h3 id={`${column.status}-heading`} className="column-heading">
+                <span
+                  className={`status-dot ${column.dotClass}`}
+                  aria-hidden="true"
+                />
+                {column.label}
+              </h3>
 
-          <section aria-labelledby="in-progress-heading">
-            <h3 id="in-progress-heading" className="column-heading">
-              <span
-                className="status-dot status-dot--progress"
-                aria-hidden="true"
-              />
-              In Progress
-            </h3>
-
-            <ul className="task-list">
-              {filteredTasks
-                .filter((task) => task.status === "in-progress")
-                .map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onSelect={setSelectedTaskId}
-                  />
-                ))}
-            </ul>
-          </section>
-
-          <section aria-labelledby="done-heading">
-            <h3 id="done-heading" className="column-heading">
-              <span
-                className="status-dot status-dot--done"
-                aria-hidden="true"
-              />
-              Done
-            </h3>
-
-            <ul className="task-list">
-              {filteredTasks
-                .filter((task) => task.status === "done")
-                .map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onSelect={setSelectedTaskId}
-                  />
-                ))}
-            </ul>
-          </section>
+              <ul className="task-list">
+                {filteredTasks
+                  .filter((task) => task.status === column.status)
+                  .map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onSelect={setSelectedTaskId}
+                      onDragStart={startTaskDrag}
+                      onDragEnd={endTaskDrag}
+                      isDragging={draggedTaskId === task.id}
+                      disabled={isMovingTask}
+                    />
+                  ))}
+              </ul>
+            </section>
+          ))}
         </div>
       </section>
+
+      {isMovingTask && <p role="status">Saving task move…</p>}
+      {moveError && <p role="alert">{moveError}</p>}
 
       {selectedTask && (
         <TaskDetails

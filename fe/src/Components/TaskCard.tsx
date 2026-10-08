@@ -1,11 +1,23 @@
 import type { Task } from "../types/Task";
+import type { DragEvent } from "react";
 
 interface TaskCardProps {
   task: Task;
   onSelect: (taskId: string) => void;
+  onDragStart: (event: DragEvent<HTMLLIElement>, taskId: string) => void;
+  onDragEnd: () => void;
+  isDragging: boolean;
+  disabled: boolean;
 }
 
-function TaskCard({ task, onSelect }: TaskCardProps) {
+function TaskCard({
+  task,
+  onSelect,
+  onDragStart,
+  onDragEnd,
+  isDragging,
+  disabled,
+}: TaskCardProps) {
   const completedCount = task.checklist.filter((item) => item.completed).length;
 
   const checklistCount = task.checklist.length;
@@ -13,11 +25,17 @@ function TaskCard({ task, onSelect }: TaskCardProps) {
   const categoryClass = task.category.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <li className="task-card">
+    <li
+      className={`task-card ${isDragging ? "task-card--dragging" : ""}`}
+      draggable={!disabled}
+      onDragStart={(event) => onDragStart(event, task.id)}
+      onDragEnd={onDragEnd}
+    >
       <h4 className="task-card-title">
         <button
           type="button"
           className="task-title-button"
+          disabled={disabled}
           onClick={() => onSelect(task.id)}
         >
           {task.title}

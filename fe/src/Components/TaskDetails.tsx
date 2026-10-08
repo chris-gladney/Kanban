@@ -19,6 +19,7 @@ const statusLabels = {
 function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
   const [draftTask, setDraftTask] = useState<Task>(task);
   const [commentText, setCommentText] = useState("");
+  const [commentAuthor, setCommentAuthor] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
 
@@ -68,11 +69,13 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
 
   function addDraftComment() {
     const text = commentText.trim();
-    if (!text) return;
+    const author = commentAuthor.trim();
+
+    if (!text || !author) return;
 
     const comment: Task["comments"][number] = {
       id: crypto.randomUUID(),
-      author: "You",
+      author,
       text,
       createdAt: new Date().toISOString(),
     };
@@ -229,11 +232,11 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
               >
                 <path d="M21 14a3 3 0 0 1-3 3H8l-5 4V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z" />
               </svg>
-              {task.comments.length}
+              {draftTask.comments.length}
             </span>
           </div>
 
-          {task.comments.map((comment) => (
+          {draftTask.comments.map((comment) => (
             <div key={comment.id} className="task-details-comment">
               <strong>{comment.author}</strong>
               <p>{comment.text}</p>
@@ -246,6 +249,18 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
               addDraftComment();
             }}
           >
+            <label htmlFor="comment-author">Author</label>
+
+            <input
+              id="comment-author"
+              className="details-control"
+              type="text"
+              value={commentAuthor}
+              onChange={(event) => setCommentAuthor(event.target.value)}
+              placeholder="Your name"
+              autoComplete="name"
+              required
+            />
             <label htmlFor="new-comment">Add a comment</label>
 
             <textarea
@@ -260,7 +275,7 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
             <button
               type="submit"
               className="comment-submit"
-              disabled={!commentText.trim()}
+              disabled={!commentText.trim() || !commentAuthor.trim()}
             >
               Add comment
             </button>

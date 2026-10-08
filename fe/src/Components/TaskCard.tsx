@@ -22,8 +22,6 @@ function TaskCard({
 
   const checklistCount = task.checklist.length;
 
-  const categoryClass = task.category.toLowerCase().replace(/\s+/g, "-");
-
   return (
     <li
       className={`task-card ${isDragging ? "task-card--dragging" : ""}`}

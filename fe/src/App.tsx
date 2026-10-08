@@ -17,6 +17,13 @@ function App() {
   const [loadError, setLoadError] = useState("");
   const [createError, setCreateError] = useState("");
 
+  const [searchInput, setSearchInput] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+
+  const filteredTasks = tasksList.filter((task) =>
+    task.title.toLowerCase().includes(appliedSearch.trim().toLowerCase()),
+  );
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -100,7 +107,9 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create task");
+        const errorBody = await response.json();
+
+        throw new Error(errorBody.message || "Failed to create task");
       }
 
       const createdTask: Task = await response.json();
@@ -108,8 +117,14 @@ function App() {
       setTasksList((previousTasks) => [...previousTasks, createdTask]);
 
       setIsAddingTask(false);
-    } catch {
-      setCreateError("Could not create the task. Please try again.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not create the task. Please try again.";
+
+      console.error("Task creation failed:", error);
+      setCreateError(message);
     }
   }
 
@@ -139,10 +154,16 @@ function App() {
               type="search"
               aria-label="Search tasks"
               placeholder="Search tasks..."
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
             />
           </div>
 
-          <button type="button" className="filter-button">
+          <button
+            type="button"
+            className="filter-button"
+            onClick={() => setAppliedSearch(searchInput)}
+          >
             Filter
           </button>
 
@@ -178,13 +199,15 @@ function App() {
             </h3>
 
             <ul className="task-list">
-              {todoTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onSelect={setSelectedTaskId}
-                />
-              ))}
+              {filteredTasks
+                .filter((task) => task.status === "todo")
+                .map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTaskId}
+                  />
+                ))}
             </ul>
           </section>
 
@@ -198,13 +221,15 @@ function App() {
             </h3>
 
             <ul className="task-list">
-              {inProgressTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onSelect={setSelectedTaskId}
-                />
-              ))}
+              {filteredTasks
+                .filter((task) => task.status === "in-progress")
+                .map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTaskId}
+                  />
+                ))}
             </ul>
           </section>
 
@@ -218,13 +243,15 @@ function App() {
             </h3>
 
             <ul className="task-list">
-              {doneTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onSelect={setSelectedTaskId}
-                />
-              ))}
+              {filteredTasks
+                .filter((task) => task.status === "done")
+                .map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTaskId}
+                  />
+                ))}
             </ul>
           </section>
         </div>

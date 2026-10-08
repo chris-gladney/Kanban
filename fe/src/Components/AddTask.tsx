@@ -143,9 +143,9 @@ function AddTask({ onClose, onCreate }: AddTaskProps) {
                 setPriority(event.target.value as Task["priority"])
               }
             >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
             </select>
           </div>
 

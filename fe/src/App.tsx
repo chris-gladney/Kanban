@@ -2,17 +2,20 @@ import { useState } from "react";
 import "./App.css";
 import initialTasks from "./assets/fakeDB/tasks.ts";
 import type { Task } from "./types/Task.ts";
+import TaskCard from "./Components/TaskCard.tsx";
+import TaskDetails from "./Components/TaskDetails.tsx";
 
 function App() {
   const [tasksList, setTasksList] = useState<Task[]>(initialTasks);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  const selectedTask = tasksList.find((task) => task.id === selectedTaskId);
 
   const todoTasks = tasksList.filter((task) => task.status === "todo");
   const inProgressTasks = tasksList.filter(
     (task) => task.status === "in-progress",
   );
   const doneTasks = tasksList.filter((task) => task.status === "done");
-
-  console.log(tasksList);
 
   return (
     <main>
@@ -64,7 +67,13 @@ function App() {
             </h3>
             <ul className="task-list">
               {todoTasks.map((task) => {
-                return <li key={task.id}>{task.title}</li>;
+                return (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTaskId}
+                  />
+                );
               })}
             </ul>
           </section>
@@ -78,7 +87,13 @@ function App() {
             </h3>
             <ul className="task-list">
               {inProgressTasks.map((task) => {
-                return <li key={task.id}>{task.title}</li>;
+                return (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTaskId}
+                  />
+                );
               })}
             </ul>
           </section>
@@ -92,12 +107,24 @@ function App() {
             </h3>
             <ul className="task-list">
               {doneTasks.map((task) => {
-                return <li key={task.id}>{task.title}</li>;
+                return (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSelect={setSelectedTaskId}
+                  />
+                );
               })}
             </ul>
           </section>
         </div>
       </section>
+      {selectedTask && (
+        <TaskDetails
+          task={selectedTask}
+          onClose={() => setSelectedTaskId(null)}
+        />
+      )}
     </main>
   );
 }

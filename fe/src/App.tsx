@@ -4,10 +4,12 @@ import initialTasks from "./assets/fakeDB/tasks.ts";
 import type { Task } from "./types/Task.ts";
 import TaskCard from "./Components/TaskCard.tsx";
 import TaskDetails from "./Components/TaskDetails.tsx";
+import AddTask, { type NewTaskData } from "./Components/AddTask.tsx";
 
 function App() {
   const [tasksList, setTasksList] = useState<Task[]>(initialTasks);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isAddingTask, setIsAddingTask] = useState(false);
 
   const selectedTask = tasksList.find((task) => task.id === selectedTaskId);
 
@@ -16,6 +18,27 @@ function App() {
     (task) => task.status === "in-progress",
   );
   const doneTasks = tasksList.filter((task) => task.status === "done");
+
+  async function saveTask(updatedTask: Task): Promise<void> {
+    setTasksList((previousTasks) =>
+      previousTasks.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task,
+      ),
+    );
+  }
+
+  function createTask(taskData: NewTaskData) {
+    const newTask = {
+      ...taskData,
+      id: crypto.randomUUID(),
+      comments: [],
+      category: "Design",
+      position: 1
+    };
+
+    setTasksList((previousTasks) => [...previousTasks, newTask]);
+    setIsAddingTask(false);
+  }
 
   return (
     <main>
@@ -48,7 +71,11 @@ function App() {
           <button type="button" className="filter-button">
             Filter
           </button>
-          <button type="button" className="new-task-button">
+          <button
+            type="button"
+            className="new-task-button"
+            onClick={() => setIsAddingTask(true)}
+          >
             + New Task
           </button>
         </div>
@@ -121,9 +148,14 @@ function App() {
       </section>
       {selectedTask && (
         <TaskDetails
+          key={selectedTask.id}
           task={selectedTask}
           onClose={() => setSelectedTaskId(null)}
+          onSave={saveTask}
         />
+      )}
+      {isAddingTask && (
+        <AddTask onClose={() => setIsAddingTask(false)} onCreate={createTask} />
       )}
     </main>
   );

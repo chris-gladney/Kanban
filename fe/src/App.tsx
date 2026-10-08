@@ -42,6 +42,18 @@ function App() {
 
   const moveInFlight = useRef(false);
 
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
+
   const filteredTasks = tasksList.filter((task) =>
     task.title.toLowerCase().includes(appliedSearch.trim().toLowerCase()),
   );
@@ -78,6 +90,11 @@ function App() {
 
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   const selectedTask = tasksList.find((task) => task.id === selectedTaskId);
 
@@ -246,6 +263,17 @@ function App() {
         </div>
 
         <div className="board-controls">
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label="Dark mode"
+            aria-pressed={theme === "dark"}
+            onClick={() =>
+              setTheme((current) => (current === "light" ? "dark" : "light"))
+            }
+          >
+            {theme === "light" ? "Dark mode" : "Light mode"}
+          </button>
           <div className="search-field">
             <svg
               className="search-icon"

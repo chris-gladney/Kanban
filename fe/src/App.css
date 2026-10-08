@@ -947,3 +947,140 @@ header {
 .task-title-button:disabled {
   cursor: wait;
 }
+
+.theme-toggle {
+  border: 1px solid #dce1e8;
+  background-color: #ffffff;
+  color: #334155;
+}
+
+.theme-toggle:hover {
+  background-color: #f1f5f9;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  background-color: #0f172a;
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] body {
+  background-color: #0f172a;
+}
+
+[data-theme="dark"] .board-columns > section {
+  background-color: #1e293b;
+}
+
+[data-theme="dark"] .board-columns > section.board-column--over {
+  background-color: #303b65;
+  box-shadow: inset 0 0 0 2px #818cf8;
+}
+
+[data-theme="dark"] .task-card {
+  background-color: #263449;
+  border-color: #3b4a60;
+}
+
+[data-theme="dark"] .task-details,
+[data-theme="dark"] .add-task-dialog {
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+[data-theme="dark"] .title-block h1,
+[data-theme="dark"] .tasks > h2,
+[data-theme="dark"] .column-heading,
+[data-theme="dark"] .task-card-title,
+[data-theme="dark"] .task-details h2,
+[data-theme="dark"] .task-details-section h3,
+[data-theme="dark"] .task-details-comment strong,
+[data-theme="dark"] .comment-form label,
+[data-theme="dark"] .add-task-header h2 {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .title-block p,
+[data-theme="dark"] .task-description,
+[data-theme="dark"] .task-checklist,
+[data-theme="dark"] .task-meta,
+[data-theme="dark"] .search-icon,
+[data-theme="dark"] .add-task-header p,
+[data-theme="dark"] .task-form-footer > span,
+[data-theme="dark"] .task-form-checklist label span {
+  color: #b6c2d2;
+}
+
+[data-theme="dark"] .search-field input,
+[data-theme="dark"] .details-control,
+[data-theme="dark"] .comment-form textarea,
+[data-theme="dark"] .add-task-form input,
+[data-theme="dark"] .add-task-form select,
+[data-theme="dark"] .add-task-form textarea {
+  background-color: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .filter-button,
+[data-theme="dark"] .theme-toggle,
+[data-theme="dark"] .add-task-form button {
+  background-color: #334155;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .filter-button:hover,
+[data-theme="dark"] .theme-toggle:hover,
+[data-theme="dark"] .add-task-form button:hover:not(:disabled) {
+  background-color: #475569;
+}
+
+[data-theme="dark"] .add-task-form .create-task-button {
+  background-color: #3e4ee8;
+  border-color: #3e4ee8;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .add-task-form .create-task-button:hover:not(:disabled) {
+  background-color: #3342ce;
+}
+
+[data-theme="dark"] .task-title-button:hover {
+  color: #a5b4fc;
+}
+
+[data-theme="dark"] .task-details-close,
+[data-theme="dark"] .close-task-button {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .task-details-close:hover {
+  background-color: #334155;
+}
+
+[data-theme="dark"] .task-details-section,
+[data-theme="dark"] .task-form-checklist,
+[data-theme="dark"] .task-form-footer {
+  border-color: #475569;
+}
+
+[data-theme="dark"] .task-count {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .save-error,
+[data-theme="dark"] .task-form-error {
+  color: #fca5a5;
+}

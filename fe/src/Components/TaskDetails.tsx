@@ -223,6 +223,15 @@ function TaskDetails({ task, onClose, onSave }: TaskDetailsProps) {
           {draftTask.comments.map((comment) => (
             <div key={comment.id} className="task-details-comment">
               <strong>{comment.author}</strong>
+              <time className="comment-date" dateTime={comment.createdAt}>
+                {new Intl.DateTimeFormat("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }).format(new Date(comment.createdAt))}
+              </time>
               <p>{comment.text}</p>
             </div>
           ))}

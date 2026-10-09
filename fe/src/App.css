@@ -286,17 +286,17 @@ header {
   color: #047857;
 }
 
-.priority--high {
+.priority--High {
   background-color: #fee2e2;
   color: #b91c1c;
 }
 
-.priority--medium {
+.priority--Medium {
   background-color: #fff1d6;
   color: #a65b00;
 }
 
-.priority--low {
+.priority--Low {
   background-color: #e3efff;
   color: #1d4ed8;
 }
@@ -1083,4 +1083,15 @@ header {
 [data-theme="dark"] .save-error,
 [data-theme="dark"] .task-form-error {
   color: #fca5a5;
+}
+
+.comment-date {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+[data-theme="dark"] .comment-date {
+  color: #b6c2d2;
 }
